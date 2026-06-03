@@ -35,7 +35,9 @@ jobs:
       - run: npm ci
       - run: npm test
       - name: Write env file
-        run: echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+          echo "DATABASE_SSL=true" >> .env
       - run: npm run check:ready
 
   build:
