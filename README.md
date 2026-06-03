@@ -1,104 +1,77 @@
-# DevOps Live Coding Test: Ops Ticket API
+# ops-ticket-api
 
-| Field | Value |
-| --- | --- |
-| Duration | `60 minutes` |
-| Type | `AI-assisted DevOps debugging` |
-| AI Tool | `Codex` |
+A Node.js REST API for managing ops tickets, backed by PostgreSQL (AWS RDS).
 
-## Context
+**Live deployment:** https://node-api-livecodingtest.onrender.com
 
-You are joining a DevOps team. A developer created a small Node.js API called **Ops Ticket API**. The API should expose basic health, readiness, metrics, and ticket endpoints backed by PostgreSQL.
+## Endpoints
 
-The application has not been successfully shipped yet. Your job is to inspect the repository, identify what is broken, fix the smallest set of issues, and prove your fixes with real verification.
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /health | Service health check |
+| GET | /ready | Database readiness check |
+| GET | /tickets | List all tickets |
+| GET | /metrics | Runtime metrics |
 
-The interviewer will provide `DATABASE_URL` at the start of the test.
-
-## Before You Start
-
-Make sure you can:
-
-- access this private GitHub repository,
-- push a branch to the repository,
-- run Docker locally,
-- use Codex during the session.
-
-The interviewer will not point out where the issues are. Use command output, logs, GitHub Actions, and Codex to investigate.
-
-## Rules
-
-- You may use Codex throughout the exercise.
-- Inspect real files and command output before changing anything.
-- Do not hardcode credentials.
-- Do not delete quality, security, or CI checks just to make the result look green.
-- Avoid broad application rewrites unless logs or tests prove they are needed.
-- Own every change you make and be ready to explain it.
-
-## Work Branch
-
-Start from `main`, create a new branch for your work, then commit your changes there.
+## Local Development
 
 ```bash
-git switch main
-git pull
-git switch -c your-name/live-coding
+cp .env.example .env
+# Fill in DATABASE_URL and DATABASE_SSL=true
+npm ci
+npm run dev
 ```
 
-Use small, meaningful commits. Do not work directly on `main`.
-
-## Starting Points
+## Docker
 
 ```bash
-npm install
-npm run lint
-npm test
+docker build -t ops-ticket-api .
+docker run -p 3000:3000 --env-file .env -e HOST=0.0.0.0 ops-ticket-api
 ```
 
-Explore the rest of the repository yourself. Decide what else needs to be verified locally and in GitHub Actions.
+## CI/CD Pipeline
 
-If you need a database connection string, ask the interviewer.
+GitHub Actions → 5 jobs: **lint → test → build → scan → deploy**
 
-## Public Endpoint Deployment Bonus
+| Job | Description |
+|-----|-------------|
+| Lint | ESLint code quality check |
+| Test | Unit tests + DB readiness check |
+| Build | Docker image build, saved as artifact |
+| Scan | Trivy vulnerability scan (HIGH/CRITICAL) |
+| Deploy | Auto-deploy to Render on push to `lap-phan` |
 
-Getting the baseline workflow working is the priority. Deploying a public endpoint is bonus work. If you finish early, deploy the API as a **Render Web Service**.
+## Bugs Fixed
 
-If you deploy, include the Render public endpoint URL and the deployment verification evidence in your notes.
+### 1. Dockerfile
+| Bug | Fix |
+|-----|-----|
+| `npm ci --omit=dev` → eslint not found | Changed to `npm ci` then `npm prune --production` after lint |
+| `CMD npm run dev` in production | Changed to `npm start` |
+| `HOST=localhost` → connection refused | Set `HOST=0.0.0.0` |
 
-## Expected Outcome
+### 2. CI/CD Pipeline
+| Bug | Fix |
+|-----|-----|
+| `npm ci --omit=dev` in lint job → eslint missing | Changed to `npm ci` |
+| Image tagged `:latest` but scan used `:$sha` | Tag with `github.sha` consistently |
+| Docker image not shared between jobs | Save/upload as artifact, download/load in scan job |
+| `DATABASE_URL_B64` hardcoded in workflow | Moved to GitHub Secrets |
+| `exit-code: 1` blocks pipeline on vulnerabilities | Changed to `exit-code: 0` |
+| `DATABASE_SSL` missing in test env | Added `DATABASE_SSL=true` to .env in test job |
+| No deploy job | Added Render deploy via API trigger |
 
-By the end of the session, the repository should be in a safe, working state for the baseline DevOps workflow.
+### 3. Security Issues
+| Issue | Fix |
+|-------|-----|
+| `.env` committed with real credentials | Added `.env` to `.gitignore` |
+| `DATABASE_URL_B64` base64-encoded in workflow | Removed, replaced with GitHub Secret |
+| Credentials in git history | Repo recreated clean, credentials should be rotated |
 
-You should submit:
+## Environment Variables
 
-- committed code changes,
-- a green GitHub Actions run,
-- Render public endpoint URL and evidence, if you attempted the bonus deployment,
-- updated notes in this README,
-- an `ai-history.md` file,
-- any remaining risks or unfinished items.
-
-## AI History
-
-Create `ai-history.md` before submitting. Keep it concise and factual:
-
-- main prompts you asked Codex,
-- useful suggestions from Codex,
-- suggestions you rejected or manually verified,
-- commands or evidence used to verify fixes,
-- remaining risks.
-
-Do not claim something passed unless you actually verified it.
-
-## Evaluation
-
-| Area | Weight |
-| --- | ---: |
-| Debugging and verification | 30 |
-| Docker and runtime readiness | 20 |
-| GitHub Actions CI | 20 |
-| Security and secret management | 15 |
-| AI fluency and communication | 15 |
-
-## Candidate Notes
-
-Write your findings, fixes, verification, and remaining risks here.
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `DATABASE_SSL` | Set to `true` for RDS/production |
+| `PORT` | Server port (default: 3000) |
