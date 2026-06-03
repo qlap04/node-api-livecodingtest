@@ -14,6 +14,17 @@ The application has not been successfully shipped yet. Your job is to inspect th
 
 The interviewer will provide `DATABASE_URL` at the start of the test.
 
+## Before You Start
+
+Make sure you can:
+
+- access this private GitHub repository,
+- push a branch to the repository,
+- run Docker locally,
+- use Codex during the session.
+
+The interviewer will not point out where the issues are. Use command output, logs, GitHub Actions, and Codex to investigate.
+
 ## Rules
 
 - You may use Codex throughout the exercise.
@@ -44,6 +55,8 @@ npm test
 ```
 
 Explore the rest of the repository yourself. Decide what else needs to be verified locally and in GitHub Actions.
+
+If you need a database connection string, ask the interviewer.
 
 ## Deployment
 
