@@ -58,9 +58,9 @@ Explore the rest of the repository yourself. Decide what else needs to be verifi
 
 If you need a database connection string, ask the interviewer.
 
-## Deployment
+## Public Endpoint Deployment Bonus
 
-Getting the baseline workflow working is the priority. If you finish early, deploy the API to a public platform such as Vercel, Render, Railway, Fly.io, or another service you are comfortable with.
+Getting the baseline workflow working is the priority. Deploying a public endpoint is bonus work. If you finish early, deploy the API to a public platform such as Vercel, Render, Railway, Fly.io, or another service you are comfortable with.
 
 If you deploy, include the public URL and the deployment verification evidence in your notes.
 
@@ -72,7 +72,7 @@ You should submit:
 
 - committed code changes,
 - a green GitHub Actions run,
-- deployment URL and evidence, if you attempted the bonus deployment,
+- public endpoint URL and evidence, if you attempted the bonus deployment,
 - updated notes in this README,
 - an `ai-history.md` file,
 - any remaining risks or unfinished items.
